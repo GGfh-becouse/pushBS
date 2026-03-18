@@ -1,679 +1,75 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Brawl Stars | Победы</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<title>Счётчик</title>
 
-        body {
-            background: linear-gradient(135deg, #1a2639, #0d1b2a);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 16px;
-            font-family: 'Montserrat', sans-serif;
-            position: relative;
-            overflow-x: hidden;
-        }
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+    }
 
-        /* Brawl Stars фон с паттерном */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.03) 2px, transparent 2px),
-                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 2px, transparent 2px),
-                radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.03) 3px, transparent 3px),
-                radial-gradient(circle at 70% 20%, rgba(255, 215, 0, 0.03) 3px, transparent 3px);
-            background-size: 100px 100px;
-            pointer-events: none;
-        }
+    #count {
+        font-size: 60px;
+        margin-bottom: 30px;
+    }
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: rgba(20, 30, 45, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 48px;
-            padding: 32px 24px;
-            box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 3px #2a3b4c inset, 0 0 0 6px #1e2b3a inset;
-            border: 2px solid #f3c950;
-            position: relative;
-            z-index: 10;
-        }
+    .buttons {
+        display: flex;
+        gap: 20px;
+    }
 
-        /* Декоративные уголки */
-        .corner {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3c950;
-            filter: drop-shadow(0 0 8px #f3c950);
-        }
+    button {
+        width: 80px;
+        height: 80px;
+        font-size: 40px;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
 
-        .corner-tl {
-            top: 15px;
-            left: 15px;
-            border-right: none;
-            border-bottom: none;
-        }
+    .plus {
+        background: #28a745;
+        color: white;
+    }
 
-        .corner-tr {
-            top: 15px;
-            right: 15px;
-            border-left: none;
-            border-bottom: none;
-        }
+    .minus {
+        background: #dc3545;
+        color: white;
+    }
 
-        .corner-bl {
-            bottom: 15px;
-            left: 15px;
-            border-right: none;
-            border-top: none;
-        }
-
-        .corner-br {
-            bottom: 15px;
-            right: 15px;
-            border-left: none;
-            border-top: none;
-        }
-
-        /* Заголовок с золотыми буквами */
-        .gold-title {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
-
-        .gold-title h1 {
-            font-family: 'Bowlby One SC', cursive;
-            font-size: 2.8rem;
-            font-weight: 800;
-            background: linear-gradient(180deg, #f9e181 0%, #d4a017 50%, #b8860b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 4px 0 #6b4f0e, 0 8px 10px rgba(0,0,0,0.5);
-            margin-bottom: 8px;
-            transform: perspective(500px) rotateX(5deg);
-            line-height: 1.2;
-        }
-
-        .gold-title .subtitle {
-            font-size: 0.9rem;
-            color: #8b9bb5;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            font-weight: 600;
-            background: rgba(0,0,0,0.3);
-            display: inline-block;
-            padding: 4px 16px;
-            border-radius: 40px;
-            border: 1px solid #f3c950;
-            box-shadow: 0 0 10px rgba(243, 201, 80, 0.3);
-        }
-
-        /* Цель (золотые буквы) */
-        .goal-section {
-            background: linear-gradient(145deg, #253446, #1a2639);
-            border-radius: 40px;
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 2px solid #3e5266;
-            box-shadow: 0 10px 0 #0f1a24, 0 0 0 3px #f3c950 inset;
-            position: relative;
-            text-align: center;
-        }
-
-        .goal-label {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2a3b4c;
-            color: #f3c950;
-            font-weight: 800;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 4px 16px;
-            border-radius: 40px;
-            border: 2px solid #f3c950;
-            white-space: nowrap;
-        }
-
-        .goal-value {
-            font-family: 'Bowlby One SC', cursive;
-            font-size: 3.5rem;
-            font-weight: 800;
-            background: linear-gradient(180deg, #f9e181 0%, #d4a017 50%, #b8860b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 4px 0 #6b4f0e;
-            line-height: 1;
-            margin: 10px 0 5px;
-        }
-
-        .goal-text {
-            color: #8b9bb5;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
-        }
-
-        /* Счетчик побед */
-        .wins-section {
-            background: linear-gradient(145deg, #1f2d3f, #15212e);
-            border-radius: 60px;
-            padding: 30px 24px;
-            margin-bottom: 24px;
-            border: 3px solid #3e5266;
-            box-shadow: 0 12px 0 #0a121b, 0 0 0 4px #f3c950 inset;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .wins-section::before {
-            content: '⚔️';
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            font-size: 120px;
-            opacity: 0.05;
-            transform: rotate(15deg);
-        }
-
-        .wins-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-            justify-content: center;
-        }
-
-        .wins-label span {
-            background: #2a3b4c;
-            color: #f3c950;
-            font-weight: 700;
-            font-size: 1rem;
-            text-transform: uppercase;
-            padding: 6px 16px;
-            border-radius: 40px;
-            border: 1px solid #f3c950;
-        }
-
-        .wins-label i {
-            color: #f3c950;
-            font-size: 1.4rem;
-        }
-
-        .wins-display {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .wins-value {
-            font-family: 'Bowlby One SC', cursive;
-            font-size: 6rem;
-            font-weight: 800;
-            color: #f3c950;
-            text-shadow: 0 5px 0 #6b4f0e, 0 10px 15px rgba(0,0,0,0.5);
-            line-height: 1;
-            text-align: center;
-            letter-spacing: 4px;
-        }
-
-        .wins-controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .wins-btn {
-            width: 100px;
-            height: 100px;
-            border-radius: 50px;
-            border: none;
-            background: linear-gradient(145deg, #2f4053, #1e2b3a);
-            border: 4px solid #3e5266;
-            color: #f3c950;
-            font-size: 3rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 8px 0 #0f1a24, 0 0 0 3px #f3c950 inset;
-            transition: all 0.1s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .wins-btn.plus {
-            color: #4caf50;
-        }
-
-        .wins-btn.minus {
-            color: #f44336;
-        }
-
-        .wins-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #0f1a24, 0 0 0 3px #f3c950 inset;
-        }
-
-        .wins-btn:hover {
-            filter: brightness(1.2);
-            transform: scale(1.05);
-        }
-
-        .wins-btn:active:hover {
-            transform: translateY(6px) scale(1.05);
-        }
-
-        /* Статистика */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: linear-gradient(145deg, #1f2d3f, #15212e);
-            border-radius: 30px;
-            padding: 16px;
-            border: 2px solid #3e5266;
-            box-shadow: 0 6px 0 #0a121b;
-            text-align: center;
-        }
-
-        .stat-icon {
-            font-size: 1.8rem;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: #8b9bb5;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-number {
-            font-weight: 800;
-            font-size: 1.8rem;
-            color: #f3c950;
-            text-shadow: 0 2px 0 #6b4f0e;
-        }
-
-        .stat-number.positive {
-            color: #4caf50;
-        }
-
-        .stat-number.negative {
-            color: #f44336;
-        }
-
-        /* История игр */
-        .history-section {
-            background: rgba(0,0,0,0.3);
-            border-radius: 30px;
-            padding: 16px;
-            border: 1px solid #3e5266;
-            margin-top: 20px;
-        }
-
-        .history-title {
-            color: #8b9bb5;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 150px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: rgba(30, 40, 55, 0.5);
-            border-radius: 20px;
-            border-left: 4px solid;
-        }
-
-        .history-item.win {
-            border-left-color: #4caf50;
-        }
-
-        .history-item.loss {
-            border-left-color: #f44336;
-        }
-
-        .history-result {
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .history-result.win {
-            color: #4caf50;
-        }
-
-        .history-result.loss {
-            color: #f44336;
-        }
-
-        .history-time {
-            color: #8b9bb5;
-            font-size: 0.7rem;
-        }
-
-        /* Кнопка сброса */
-        .reset-btn {
-            background: linear-gradient(145deg, #2f4053, #1e2b3a);
-            border: 2px solid #3e5266;
-            color: #8b9bb5;
-            padding: 12px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 16px;
-            border: 2px solid #f3c950;
-        }
-
-        .reset-btn:hover {
-            background: #2f4053;
-            color: #f3c950;
-        }
-
-        /* Адаптивность */
-        @media (max-width: 500px) {
-            .gold-title h1 {
-                font-size: 2rem;
-            }
-            
-            .wins-value {
-                font-size: 4rem;
-            }
-            
-            .wins-btn {
-                width: 70px;
-                height: 70px;
-                font-size: 2.2rem;
-            }
-            
-            .goal-value {
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+    button:hover {
+        transform: scale(1.1);
+    }
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- Декоративные уголки -->
-        <div class="corner corner-tl"></div>
-        <div class="corner corner-tr"></div>
-        <div class="corner corner-bl"></div>
-        <div class="corner corner-br"></div>
 
-        <!-- Золотой заголовок -->
-        <div class="gold-title">
-            <h1>BRAWL STARS</h1>
-            <div class="subtitle">ТВОЯ СТАТИСТИКА</div>
-        </div>
+<div id="count">0</div>
 
-        <!-- Цель (золотые буквы) -->
-        <div class="goal-section">
-            <div class="goal-label">ТВОЯ ЦЕЛЬ</div>
-            <div class="goal-value" id="goalValue">100</div>
-            <div class="goal-text" id="goalText">ПОБЕД</div>
-        </div>
+<div class="buttons">
+    <button class="plus" onclick="change(1)">+</button>
+    <button class="minus" onclick="change(-1)">−</button>
+</div>
 
-        <!-- Счетчик побед -->
-        <div class="wins-section">
-            <div class="wins-label">
-                <i class="fas fa-trophy"></i>
-                <span>текущие победы</span>
-                <i class="fas fa-trophy"></i>
-            </div>
-            <div class="wins-display">
-                <div class="wins-value" id="winsCount">42</div>
-                <div class="wins-controls">
-                    <button class="wins-btn plus" onclick="addWin()">+1</button>
-                    <button class="wins-btn minus" onclick="addLoss()">-1</button>
-                </div>
-            </div>
-        </div>
+<script>
+    let count = 0;
 
-        <!-- Статистика -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">⚔️</div>
-                <div class="stat-label">всего игр</div>
-                <div class="stat-number" id="totalGames">84</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">💀</div>
-                <div class="stat-label">поражений</div>
-                <div class="stat-number negative" id="lossesCount">42</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-label">win rate</div>
-                <div class="stat-number positive" id="winRate">50%</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <div class="stat-label">до цели</div>
-                <div class="stat-number" id="toGoal">58</div>
-            </div>
-        </div>
+    function change(value) {
+        count += value;
+        document.getElementById("count").innerText = count;
+    }
+</script>
 
-        <!-- История последних игр -->
-        <div class="history-section">
-            <div class="history-title">
-                <i class="fas fa-history"></i>
-                <span>последние игры</span>
-            </div>
-            <div class="history-list" id="historyList">
-                <!-- Сюда будут добавляться игры -->
-            </div>
-        </div>
-
-        <!-- Кнопка сброса -->
-        <button class="reset-btn" onclick="resetStats()">
-            <i class="fas fa-undo-alt"></i> сбросить статистику
-        </button>
-    </div>
-
-    <script>
-        // Состояние
-        let wins = 42;
-        let losses = 42;
-        let goal = 100;
-        let history = [];
-
-        // Элементы DOM
-        const winsElement = document.getElementById('winsCount');
-        const lossesElement = document.getElementById('lossesCount');
-        const totalGamesElement = document.getElementById('totalGames');
-        const winRateElement = document.getElementById('winRate');
-        const goalElement = document.getElementById('goalValue');
-        const toGoalElement = document.getElementById('toGoal');
-        const historyListElement = document.getElementById('historyList');
-
-        // Функция добавления победы
-        window.addWin = function() {
-            wins++;
-            updateStats('win');
-        };
-
-        // Функция добавления поражения
-        window.addLoss = function() {
-            losses++;
-            updateStats('loss');
-        };
-
-        // Обновление статистики
-        function updateStats(result) {
-            // Обновляем счетчики
-            winsElement.textContent = wins;
-            lossesElement.textContent = losses;
-            
-            const total = wins + losses;
-            totalGamesElement.textContent = total;
-            
-            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-            winRateElement.textContent = winRate + '%';
-            
-            // Обновляем прогресс к цели
-            const toGoal = Math.max(0, goal - wins);
-            toGoalElement.textContent = toGoal;
-            
-            // Проверяем достижение цели
-            if (wins >= goal) {
-                alert('🎉 ПОЗДРАВЛЯЕМ! Ты достиг цели в ' + goal + ' побед!');
-                goal += 50;
-                goalElement.textContent = goal;
-                toGoalElement.textContent = Math.max(0, goal - wins);
-            }
-            
-            // Добавляем в историю
-            addToHistory(result);
-        }
-
-        // Добавление в историю
-        function addToHistory(result) {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
-            
-            history.unshift({
-                result: result,
-                time: timeStr
-            });
-            
-            // Ограничиваем историю 10 записями
-            if (history.length > 10) {
-                history.pop();
-            }
-            
-            displayHistory();
-        }
-
-        // Отображение истории
-        function displayHistory() {
-            let html = '';
-            
-            history.forEach(item => {
-                const resultText = item.result === 'win' ? 'ПОБЕДА' : 'ПОРАЖЕНИЕ';
-                const resultClass = item.result === 'win' ? 'win' : 'loss';
-                
-                html += `
-                    <div class="history-item ${resultClass}">
-                        <span class="history-result ${resultClass}">${resultText}</span>
-                        <span class="history-time">${item.time}</span>
-                    </div>
-                `;
-            });
-            
-            if (history.length === 0) {
-                html = '<div style="color: #8b9bb5; text-align: center; padding: 10px;">нет игр</div>';
-            }
-            
-            historyListElement.innerHTML = html;
-        }
-
-        // Сброс статистики
-        window.resetStats = function() {
-            if (confirm('Сбросить всю статистику?')) {
-                wins = 0;
-                losses = 0;
-                history = [];
-                updateStats();
-                
-                // Дополнительное обновление
-                winsElement.textContent = wins;
-                lossesElement.textContent = losses;
-                totalGamesElement.textContent = 0;
-                winRateElement.textContent = '0%';
-                toGoalElement.textContent = goal - wins;
-                displayHistory();
-                
-                showMessage('📊 Статистика сброшена', 'info');
-            }
-        };
-
-        // Показ сообщения
-        function showMessage(text, type) {
-            const msg = document.createElement('div');
-            msg.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                border-radius: 30px;
-                color: white;
-                font-weight: 600;
-                z-index: 10002;
-                animation: slideIn 0.2s;
-                box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.15);
-                background: ${type === 'success' ? '#4caf50' : type === 'error' ? '#f44336' : '#2a3b4c'};
-                border: 2px solid #f3c950;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            `;
-            msg.textContent = text;
-            document.body.appendChild(msg);
-            setTimeout(() => msg.remove(), 3000);
-        }
-
-        // Добавляем стили для анимации
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Инициализация
-        updateStats();
-    </script>
 </body>
 </html>
