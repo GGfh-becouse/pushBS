@@ -2,58 +2,78 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Счётчик</title>
+<title>Brawl Counter</title>
 
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
-    }
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#0b1a3a,#1c2f6e);
+    color:white;
+}
 
-    #count {
-        font-size: 60px;
-        margin-bottom: 30px;
-    }
+/* 🔥 ЗОЛОТАЯ ПАНЕЛЬ */
+.top-goal{
+    position:fixed;
+    top:0;
+    width:100%;
+    padding:15px;
+    text-align:center;
+    background:linear-gradient(90deg,#ffcc00,#ff9900);
+    font-weight:bold;
+    font-size:20px;
+    box-shadow:0 0 20px rgba(255,200,0,0.8);
+}
 
-    .buttons {
-        display: flex;
-        gap: 20px;
-    }
+/* СЧЁТ */
+#count{
+    font-size:70px;
+    margin-bottom:40px;
+    text-shadow:0 0 15px #00f0ff;
+}
 
-    button {
-        width: 80px;
-        height: 80px;
-        font-size: 40px;
-        border: none;
-        border-radius: 15px;
-        cursor: pointer;
-        transition: 0.2s;
-    }
+/* КНОПКИ */
+.buttons{
+    display:flex;
+    gap:25px;
+}
 
-    .plus {
-        background: #28a745;
-        color: white;
-    }
+button{
+    width:90px;
+    height:90px;
+    font-size:45px;
+    border:none;
+    border-radius:20px;
+    cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 8px 0 rgba(0,0,0,0.3);
+}
 
-    .minus {
-        background: #dc3545;
-        color: white;
-    }
+.plus{
+    background:linear-gradient(145deg,#00ff88,#00cc66);
+}
 
-    button:hover {
-        transform: scale(1.1);
-    }
+.minus{
+    background:linear-gradient(145deg,#ff4d4d,#cc0000);
+}
+
+button:active{
+    transform:translateY(6px);
+    box-shadow:0 2px 0 rgba(0,0,0,0.3);
+}
 </style>
 </head>
 
 <body>
+
+<div class="top-goal">
+🏆 ЦЕЛЬ ПОБЕД 🏆
+</div>
 
 <div id="count">0</div>
 
@@ -63,12 +83,13 @@
 </div>
 
 <script>
-    let count = 0;
+let count = 0;
 
-    function change(value) {
-        count += value;
-        document.getElementById("count").innerText = count;
-    }
+function change(value){
+    count += value;
+    if(count < 0) count = 0;
+    document.getElementById("count").innerText = count;
+}
 </script>
 
 </body>
