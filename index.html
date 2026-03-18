@@ -1,112 +1,829 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Brawl Goal System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Brawl Stars | Кубки</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    font-family:Arial, sans-serif;
-    background:linear-gradient(135deg,#0b1a3a,#1c2f6e);
-    color:white;
-}
+        body {
+            background: linear-gradient(135deg, #1a2639, #0d1b2a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            font-family: 'Montserrat', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-/* 🔶 ЦЕЛЬ */
-.goal{
-    position:fixed;
-    top:0;
-    width:100%;
-    padding:12px;
-    text-align:center;
-    background:linear-gradient(90deg,#ffd700,#ffb300);
-    font-weight:bold;
-    font-size:18px;
-    box-shadow:0 0 15px rgba(255,215,0,0.6);
-}
+        /* Brawl Stars фон с паттерном */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.03) 2px, transparent 2px),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.03) 2px, transparent 2px),
+                radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.03) 3px, transparent 3px),
+                radial-gradient(circle at 70% 20%, rgba(255, 215, 0, 0.03) 3px, transparent 3px);
+            background-size: 100px 100px;
+            pointer-events: none;
+        }
 
-/* Счёт */
-#count{
-    font-size:65px;
-    margin-bottom:20px;
-}
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(20, 30, 45, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 48px;
+            padding: 32px 24px;
+            box-shadow: 0 25px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 3px #2a3b4c inset, 0 0 0 6px #1e2b3a inset;
+            border: 2px solid #f3c950;
+            position: relative;
+            z-index: 10;
+        }
 
-#target{
-    font-size:40px;
-    opacity:0.8;
-    margin-bottom:40px;
-}
+        /* Декоративные уголки */
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3c950;
+            filter: drop-shadow(0 0 8px #f3c950);
+        }
 
-/* Кнопки — менее заметные */
-.buttons{
-    display:flex;
-    gap:20px;
-}
+        .corner-tl {
+            top: 15px;
+            left: 15px;
+            border-right: none;
+            border-bottom: none;
+        }
 
-button{
-    width:70px;
-    height:70px;
-    font-size:35px;
-    border:none;
-    border-radius:15px;
-    cursor:pointer;
-    background:rgba(255,255,255,0.15);
-    color:white;
-    transition:0.2s;
-}
+        .corner-tr {
+            top: 15px;
+            right: 15px;
+            border-left: none;
+            border-bottom: none;
+        }
 
-button:hover{
-    background:rgba(255,255,255,0.25);
-}
+        .corner-bl {
+            bottom: 15px;
+            left: 15px;
+            border-right: none;
+            border-top: none;
+        }
 
-button:active{
-    transform:scale(0.95);
-}
-</style>
+        .corner-br {
+            bottom: 15px;
+            right: 15px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* Заголовок с золотыми буквами */
+        .gold-title {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .gold-title h1 {
+            font-family: 'Bowlby One SC', cursive;
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(180deg, #f9e181 0%, #d4a017 50%, #b8860b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 4px 0 #6b4f0e, 0 8px 10px rgba(0,0,0,0.5);
+            margin-bottom: 8px;
+            transform: perspective(500px) rotateX(5deg);
+            line-height: 1.2;
+        }
+
+        .gold-title .subtitle {
+            font-size: 0.9rem;
+            color: #8b9bb5;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 600;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            border: 1px solid #f3c950;
+            box-shadow: 0 0 10px rgba(243, 201, 80, 0.3);
+        }
+
+        /* Цель */
+        .goal-section {
+            background: linear-gradient(145deg, #253446, #1a2639);
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 2px solid #3e5266;
+            box-shadow: 0 10px 0 #0f1a24, 0 0 0 3px #f3c950 inset;
+            position: relative;
+        }
+
+        .goal-label {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a3b4c;
+            color: #f3c950;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 4px 16px;
+            border-radius: 40px;
+            border: 2px solid #f3c950;
+            white-space: nowrap;
+        }
+
+        .goal-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .goal-item {
+            flex: 1;
+            text-align: center;
+            background: #1e2b3a;
+            border-radius: 30px;
+            padding: 12px 8px;
+            border: 2px solid #3e5266;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .goal-item.selected {
+            background: linear-gradient(145deg, #2f3f52, #253446);
+            border-color: #f3c950;
+            box-shadow: 0 0 15px #f3c950;
+            transform: translateY(-2px);
+        }
+
+        .goal-icon {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .goal-name {
+            color: #8b9bb5;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .goal-value {
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #f3c950;
+            text-shadow: 0 2px 0 #6b4f0e;
+        }
+
+        /* Счетчик кубков */
+        .trophies-section {
+            background: linear-gradient(145deg, #1f2d3f, #15212e);
+            border-radius: 60px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 3px solid #3e5266;
+            box-shadow: 0 12px 0 #0a121b, 0 0 0 4px #f3c950 inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trophies-section::before {
+            content: '🏆';
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            font-size: 120px;
+            opacity: 0.05;
+            transform: rotate(15deg);
+        }
+
+        .trophies-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .trophies-label span {
+            background: #2a3b4c;
+            color: #f3c950;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 40px;
+            border: 1px solid #f3c950;
+        }
+
+        .trophies-label i {
+            color: #f3c950;
+            font-size: 1.2rem;
+        }
+
+        .trophies-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .trophies-value {
+            font-family: 'Bowlby One SC', cursive;
+            font-size: 5rem;
+            font-weight: 800;
+            color: #f3c950;
+            text-shadow: 0 5px 0 #6b4f0e, 0 10px 15px rgba(0,0,0,0.5);
+            line-height: 1;
+            min-width: 180px;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .trophies-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .trophy-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(145deg, #2f4053, #1e2b3a);
+            border: 3px solid #3e5266;
+            color: #f3c950;
+            font-size: 2rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #0f1a24, 0 0 0 2px #f3c950 inset;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .trophy-btn.plus {
+            color: #4caf50;
+        }
+
+        .trophy-btn.minus {
+            color: #f44336;
+        }
+
+        .trophy-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #0f1a24, 0 0 0 2px #f3c950 inset;
+        }
+
+        .trophy-btn:hover {
+            filter: brightness(1.2);
+        }
+
+        .trophy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: 0 5px 0 #0f1a24, 0 0 0 2px #f3c950 inset;
+        }
+
+        /* Статистика */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #1f2d3f, #15212e);
+            border-radius: 30px;
+            padding: 16px;
+            border: 2px solid #3e5266;
+            box-shadow: 0 6px 0 #0a121b;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #8b9bb5;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-number {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #f3c950;
+            text-shadow: 0 2px 0 #6b4f0e;
+        }
+
+        .stat-number.positive {
+            color: #4caf50;
+        }
+
+        .stat-number.negative {
+            color: #f44336;
+        }
+
+        /* Кнопка действия */
+        .action-btn {
+            background: linear-gradient(145deg, #f3c950, #d4a017);
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #1a2639;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #6b4f0e, 0 0 0 3px #f9e181 inset;
+            transition: all 0.1s;
+            margin-bottom: 20px;
+            font-family: 'Bowlby One SC', cursive;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: skewX(-25deg);
+            animation: btnShine 3s infinite;
+        }
+
+        @keyframes btnShine {
+            0% { left: -100%; }
+            20% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        .action-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 #6b4f0e, 0 0 0 3px #f9e181 inset;
+        }
+
+        /* Рейтинг */
+        .rank-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            padding: 16px;
+            border: 1px solid #3e5266;
+        }
+
+        .rank-title {
+            color: #8b9bb5;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rank-bar {
+            height: 24px;
+            background: #1e2b3a;
+            border-radius: 30px;
+            overflow: hidden;
+            border: 2px solid #3e5266;
+            margin-bottom: 8px;
+        }
+
+        .rank-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f3c950, #f9e181);
+            border-radius: 30px;
+            transition: width 0.3s;
+        }
+
+        .rank-info {
+            display: flex;
+            justify-content: space-between;
+            color: #f3c950;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Боевой пропуск */
+        .brawl-pass {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px;
+            background: rgba(243, 201, 80, 0.1);
+            border-radius: 40px;
+        }
+
+        .brawl-pass-icon {
+            width: 36px;
+            height: 36px;
+            background: #f3c950;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a2639;
+            font-size: 1.2rem;
+        }
+
+        .brawl-pass-text {
+            flex: 1;
+            color: #8b9bb5;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .brawl-pass-value {
+            color: #f3c950;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 500px) {
+            .gold-title h1 {
+                font-size: 2rem;
+            }
+            
+            .trophies-value {
+                font-size: 3.5rem;
+                min-width: 120px;
+            }
+            
+            .trophy-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.8rem;
+            }
+            
+            .goal-content {
+                flex-direction: column;
+            }
+            
+            .goal-item {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <!-- Декоративные уголки -->
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
 
-<div class="goal">
-🏆 ЦЕЛЬ ПОБЕД
-</div>
+        <!-- Золотой заголовок -->
+        <div class="gold-title">
+            <h1>BRAWL STARS</h1>
+            <div class="subtitle">ТВОЙ ПУТЬ К СЛАВЕ</div>
+        </div>
 
-<div id="target">Цель: 100</div>
-<div id="count">0</div>
+        <!-- Цель -->
+        <div class="goal-section">
+            <div class="goal-label">ВЫБЕРИ ЦЕЛЬ</div>
+            <div class="goal-content">
+                <div class="goal-item selected" onclick="selectGoal('trophies', this)">
+                    <div class="goal-icon">🏆</div>
+                    <div class="goal-name">кубки</div>
+                    <div class="goal-value" id="goalTrophies">25000</div>
+                </div>
+                <div class="goal-item" onclick="selectGoal('rank', this)">
+                    <div class="goal-icon">👑</div>
+                    <div class="goal-name">ранг</div>
+                    <div class="goal-value" id="goalRank">35</div>
+                </div>
+                <div class="goal-item" onclick="selectGoal('wins', this)">
+                    <div class="goal-icon">⚔️</div>
+                    <div class="goal-name">победы</div>
+                    <div class="goal-value" id="goalWins">1000</div>
+                </div>
+            </div>
+        </div>
 
-<div class="buttons">
-    <button onclick="changeTarget(-1)">−</button>
-    <button onclick="changeTarget(1)">+</button>
-</div>
+        <!-- Счетчик кубков -->
+        <div class="trophies-section">
+            <div class="trophies-label">
+                <i class="fas fa-trophy"></i>
+                <span>текущие кубки</span>
+            </div>
+            <div class="trophies-display">
+                <div class="trophies-value" id="trophiesCount">15750</div>
+                <div class="trophies-controls">
+                    <button class="trophy-btn plus" onclick="changeTrophies(100)" id="plusBtn">+100</button>
+                    <button class="trophy-btn plus" onclick="changeTrophies(10)" id="plusBtnSmall">+10</button>
+                    <button class="trophy-btn minus" onclick="changeTrophies(-10)" id="minusBtnSmall">-10</button>
+                    <button class="trophy-btn minus" onclick="changeTrophies(-100)" id="minusBtn">-100</button>
+                </div>
+            </div>
+        </div>
 
-<br>
+        <!-- Статистика -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">⚔️</div>
+                <div class="stat-label">побед</div>
+                <div class="stat-number" id="winsCount">1243</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💀</div>
+                <div class="stat-label">поражений</div>
+                <div class="stat-number" id="lossesCount">876</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">win rate</div>
+                <div class="stat-number positive" id="winRate">59%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">макс. кубков</div>
+                <div class="stat-number" id="maxTrophies">16200</div>
+            </div>
+        </div>
 
-<div class="buttons">
-    <button onclick="changeCount(-1)">−</button>
-    <button onclick="changeCount(1)">+</button>
-</div>
+        <!-- Рейтинг -->
+        <div class="rank-section">
+            <div class="rank-title">
+                <i class="fas fa-chart-line"></i>
+                <span>прогресс до следующего ранга</span>
+            </div>
+            <div class="rank-bar">
+                <div class="rank-fill" id="rankProgress" style="width: 75%"></div>
+            </div>
+            <div class="rank-info">
+                <span>серебро I</span>
+                <span id="trophiesToNext">750 / 1000</span>
+                <span>серебро II</span>
+            </div>
+        </div>
 
-<script>
-let count = 0;
-let target = 100;
+        <!-- Боевой пропуск -->
+        <div class="brawl-pass">
+            <div class="brawl-pass-icon">
+                <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="brawl-pass-text">боевой пропуск</div>
+            <div class="brawl-pass-value" id="brawlPassLevel">уровень 47</div>
+        </div>
 
-function changeCount(value){
-    count += value;
-    if(count < 0) count = 0;
-    document.getElementById("count").innerText = count;
-}
+        <!-- Кнопка действия -->
+        <button class="action-btn" onclick="startBattle()">
+            НАЧАТЬ БОЙ
+        </button>
 
-function changeTarget(value){
-    target += value;
-    if(target < 1) target = 1;
-    document.getElementById("target").innerText = "Цель: " + target;
-}
-</script>
+        <!-- Примечание о кубках -->
+        <div style="text-align: center; color: #8b9bb5; font-size: 0.7rem; margin-top: 10px;">
+            <i class="fas fa-info-circle"></i> можно уходить в минус, но это позорно
+        </div>
+    </div>
 
+    <script>
+        // Состояние
+        let trophies = 15750;
+        let wins = 1243;
+        let losses = 876;
+        let maxTrophies = 16200;
+        let selectedGoal = 'trophies';
+
+        // Цели
+        const goals = {
+            trophies: 25000,
+            rank: 35,
+            wins: 1000
+        };
+
+        // Элементы DOM
+        const trophiesElement = document.getElementById('trophiesCount');
+        const winsElement = document.getElementById('winsCount');
+        const lossesElement = document.getElementById('lossesCount');
+        const winRateElement = document.getElementById('winRate');
+        const maxTrophiesElement = document.getElementById('maxTrophies');
+        const rankProgressElement = document.getElementById('rankProgress');
+        const trophiesToNextElement = document.getElementById('trophiesToNext');
+        const brawlPassLevelElement = document.getElementById('brawlPassLevel');
+        
+        // Кнопки
+        const plusBtn = document.getElementById('plusBtn');
+        const plusBtnSmall = document.getElementById('plusBtnSmall');
+        const minusBtnSmall = document.getElementById('minusBtnSmall');
+        const minusBtn = document.getElementById('minusBtn');
+
+        // Функция выбора цели
+        window.selectGoal = function(goal, element) {
+            // Убираем выделение у всех
+            document.querySelectorAll('.goal-item').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный
+            element.classList.add('selected');
+            selectedGoal = goal;
+            
+            // Обновляем отображение
+            updateGoalDisplay();
+        };
+
+        // Обновление отображения целей
+        function updateGoalDisplay() {
+            document.getElementById('goalTrophies').textContent = goals.trophies;
+            document.getElementById('goalRank').textContent = goals.rank;
+            document.getElementById('goalWins').textContent = goals.wins;
+        }
+
+        // Функция изменения кубков
+        window.changeTrophies = function(amount) {
+            trophies += amount;
+            
+            // Обновляем счетчик
+            trophiesElement.textContent = trophies;
+            
+            // Обновляем максимальные кубки
+            if (trophies > maxTrophies) {
+                maxTrophies = trophies;
+                maxTrophiesElement.textContent = maxTrophies;
+            }
+            
+            // Обновляем прогресс до следующего ранга
+            updateRankProgress();
+            
+            // Обновляем боевой пропуск
+            updateBrawlPass();
+            
+            // Проверяем достижение цели
+            checkGoal();
+        };
+
+        // Обновление прогресса ранга
+        function updateRankProgress() {
+            // Ранги: бронза (0-999), серебро (1000-2999), золото (3000-5999), алмаз (6000-9999), мифический (10000-14999), легендарный (15000+)
+            let currentRank = 'бронза';
+            let nextRank = 'серебро';
+            let rankThreshold = 1000;
+            let progress = 0;
+            
+            if (trophies >= 15000) {
+                currentRank = 'легендарный';
+                nextRank = 'мастер';
+                rankThreshold = 20000;
+                progress = Math.min(100, ((trophies - 15000) / 5000) * 100);
+            } else if (trophies >= 10000) {
+                currentRank = 'мифический';
+                nextRank = 'легендарный';
+                rankThreshold = 15000;
+                progress = ((trophies - 10000) / 5000) * 100;
+            } else if (trophies >= 6000) {
+                currentRank = 'алмаз';
+                nextRank = 'мифический';
+                rankThreshold = 10000;
+                progress = ((trophies - 6000) / 4000) * 100;
+            } else if (trophies >= 3000) {
+                currentRank = 'золото';
+                nextRank = 'алмаз';
+                rankThreshold = 6000;
+                progress = ((trophies - 3000) / 3000) * 100;
+            } else if (trophies >= 1000) {
+                currentRank = 'серебро';
+                nextRank = 'золото';
+                rankThreshold = 3000;
+                progress = ((trophies - 1000) / 2000) * 100;
+            } else {
+                progress = (trophies / 1000) * 100;
+            }
+            
+            // Обновляем отображение
+            document.querySelector('.rank-info span:first-child').textContent = currentRank;
+            document.querySelector('.rank-info span:last-child').textContent = nextRank;
+            rankProgressElement.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+            
+            const needed = Math.max(0, rankThreshold - trophies);
+            trophiesToNextElement.textContent = `${trophies} / ${rankThreshold}`;
+        }
+
+        // Обновление боевого пропуска
+        function updateBrawlPass() {
+            const level = Math.floor(trophies / 500) + 1;
+            brawlPassLevelElement.textContent = `уровень ${level}`;
+        }
+
+        // Проверка достижения цели
+        function checkGoal() {
+            if (selectedGoal === 'trophies' && trophies >= goals.trophies) {
+                alert('🎉 ПОЗДРАВЛЯЕМ! Вы достигли цели в 25000 кубков!');
+                goals.trophies += 5000;
+                updateGoalDisplay();
+            } else if (selectedGoal === 'wins' && wins >= goals.wins) {
+                alert('🎉 ПОЗДРАВЛЯЕМ! Вы достигли 1000 побед!');
+                goals.wins += 500;
+                updateGoalDisplay();
+            }
+        }
+
+        // Обновление статистики после боя
+        window.startBattle = function() {
+            const battleWins = Math.random() > 0.5;
+            
+            if (battleWins) {
+                wins++;
+                changeTrophies(8);
+                showMessage('✅ ПОБЕДА! +8 кубков', 'success');
+            } else {
+                losses++;
+                changeTrophies(-6);
+                showMessage('❌ ПОРАЖЕНИЕ... -6 кубков', 'error');
+            }
+            
+            // Обновляем статистику
+            winsElement.textContent = wins;
+            lossesElement.textContent = losses;
+            
+            const winRate = Math.round((wins / (wins + losses)) * 100);
+            winRateElement.textContent = winRate + '%';
+        };
+
+        // Показ сообщения
+        function showMessage(text, type) {
+            const msg = document.createElement('div');
+            msg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 30px;
+                color: white;
+                font-weight: 600;
+                z-index: 10002;
+                animation: slideIn 0.2s;
+                box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.15);
+                background: ${type === 'success' ? '#4caf50' : '#f44336'};
+                border: 2px solid #f3c950;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            `;
+            msg.textContent = text;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+
+        // Добавляем стили для анимации
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Инициализация
+        updateGoalDisplay();
+        updateRankProgress();
+        updateBrawlPass();
+    </script>
 </body>
 </html>
