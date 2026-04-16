@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Melody Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg: #fafaf8;
+–surface: #ffffff;
+–border: #e8e6e0;
+–border-soft: #f0ede8;
+–text: #1a1814;
+–text-muted: #9a9690;
+–text-faint: #c8c4be;
+–green: #3d7a5e;
+–green-bg: #eef6f1;
+–green-dot: #5aaf85;
+–accent: #1a1814;
+–radius: 8px;
+}
+
+body {
+font-family: ‘DM Mono’, monospace;
+background: var(–bg);
+color: var(–text);
+min-height: 100vh;
+padding: 48px 24px 80px;
+letter-spacing: -0.01em;
+}
+
+/* ── Header ── */
+header {
+max-width: 760px;
+margin: 0 auto 52px;
+display: flex;
+align-items: baseline;
+gap: 20px;
+border-bottom: 1px solid var(–border);
+padding-bottom: 24px;
+}
+
+header h1 {
+font-family: ‘Cormorant Garamond’, serif;
+font-weight: 300;
+font-size: 2rem;
+letter-spacing: -0.02em;
+color: var(–text);
+}
+
+header span.sub {
+font-size: 0.68rem;
+color: var(–text-muted);
+letter-spacing: 0.12em;
+text-transform: uppercase;
+font-weight: 400;
+}
+
+/* ── Input bar ── */
+.input-bar {
+max-width: 760px;
+margin: 0 auto 40px;
+display: flex;
+gap: 10px;
+align-items: center;
+}
+
+.input-bar label {
+font-size: 0.65rem;
+letter-spacing: 0.14em;
+text-transform: uppercase;
+color: var(–text-muted);
+white-space: nowrap;
+}
+
+.input-bar input {
+flex: 1;
+border: 1px solid var(–border);
+background: var(–surface);
+border-radius: var(–radius);
+padding: 10px 16px;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.85rem;
+color: var(–text);
+outline: none;
+transition: border-color 0.15s;
+letter-spacing: 0.04em;
+}
+
+.input-bar input:focus { border-color: var(–accent); }
+.input-bar input::placeholder { color: var(–text-faint); }
+
+.btn-apply {
+padding: 10px 20px;
+background: var(–accent);
+color: #fff;
+border: none;
+border-radius: var(–radius);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.75rem;
+letter-spacing: 0.08em;
+cursor: pointer;
+transition: opacity 0.15s;
+text-transform: uppercase;
+}
+
+.btn-apply:hover { opacity: 0.78; }
+
+.btn-clear {
+padding: 10px 16px;
+background: transparent;
+color: var(–text-muted);
+border: 1px solid var(–border);
+border-radius: var(–radius);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.72rem;
+letter-spacing: 0.06em;
+cursor: pointer;
+transition: color 0.15s, border-color 0.15s;
+text-transform: uppercase;
+white-space: nowrap;
+}
+.btn-clear:hover { color: var(–text); border-color: var(–accent); }
+
+/* ── Toast ── */
+#toast {
+position: fixed;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%) translateY(10px);
+background: var(–text);
+color: #fff;
+font-size: 0.72rem;
+letter-spacing: 0.06em;
+padding: 9px 18px;
+border-radius: 40px;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.2s, transform 0.2s;
+white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Main grid ── */
+.tracker-wrap {
+max-width: 760px;
+margin: 0 auto;
+}
+
+/* Column labels */
+.col-labels {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 12px;
+margin-bottom: 10px;
+padding: 0 2px;
+}
+
+.col-label {
+text-align: center;
+font-size: 0.6rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(–text-muted);
+}
+
+/* Row labels + grid */
+.tracker-body {
+display: grid;
+grid-template-columns: 28px 1fr;
+gap: 0;
+}
+
+.row-nums {
+display: flex;
+flex-direction: column;
+gap: 8px;
+padding-top: 2px;
+}
+
+.row-num {
+height: 52px;
+display: flex;
+align-items: center;
+justify-content: flex-end;
+padding-right: 8px;
+font-size: 0.58rem;
+color: var(–text-faint);
+letter-spacing: 0.04em;
+}
+
+.grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 12px;
+}
+
+.column {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+/* ── Cell ── */
+.cell {
+height: 52px;
+border: 1px solid var(–border);
+border-radius: 6px;
+background: var(–surface);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 14px 0 12px;
+transition: border-color 0.12s, background 0.12s, transform 0.08s;
+user-select: none;
+position: relative;
+overflow: hidden;
+}
+
+.cell::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: var(–green-bg);
+opacity: 0;
+transition: opacity 0.15s;
+}
+
+.cell:hover {
+border-color: #c8c4be;
+transform: translateY(-1px);
+}
+
+.cell.active {
+border-color: var(–green);
+background: var(–green-bg);
+}
+
+.cell.active::before { opacity: 1; }
+
+.cell-code {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.72rem;
+font-style: italic;
+color: var(–text-muted);
+position: relative;
+z-index: 1;
+transition: color 0.12s;
+letter-spacing: 0.04em;
+}
+
+.cell.active .cell-code { color: var(–green); }
+
+.cell-dot {
+width: 7px;
+height: 7px;
+border-radius: 50%;
+border: 1.5px solid var(–border);
+background: transparent;
+position: relative;
+z-index: 1;
+transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+flex-shrink: 0;
+}
+
+.cell.active .cell-dot {
+border-color: var(–green-dot);
+background: var(–green-dot);
+box-shadow: 0 0 0 3px rgba(90, 175, 133, 0.2);
+}
+
+/* ── Active codes panel ── */
+.codes-panel {
+max-width: 760px;
+margin: 36px auto 0;
+padding: 20px 24px;
+background: var(–surface);
+border: 1px solid var(–border-soft);
+border-radius: var(–radius);
+}
+
+.codes-panel-header {
+font-size: 0.6rem;
+letter-spacing: 0.18em;
+text-transform: uppercase;
+color: var(–text-muted);
+margin-bottom: 12px;
+}
+
+.codes-list {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+min-height: 28px;
+}
+
+.code-tag {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+background: var(–green-bg);
+border: 1px solid rgba(61,122,94,0.2);
+color: var(–green);
+font-size: 0.72rem;
+letter-spacing: 0.06em;
+padding: 4px 10px;
+border-radius: 4px;
+cursor: pointer;
+transition: opacity 0.12s;
+}
+
+.code-tag:hover { opacity: 0.7; }
+
+.code-tag .rm { font-size: 0.65rem; color: rgba(61,122,94,0.5); }
+
+.codes-empty {
+font-size: 0.72rem;
+color: var(–text-faint);
+font-style: italic;
+}
+
+/* ── Legend ── */
+.legend {
+max-width: 760px;
+margin: 20px auto 0;
+display: flex;
+gap: 28px;
+flex-wrap: wrap;
+}
+
+.legend-item {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 0.62rem;
+color: var(–text-muted);
+letter-spacing: 0.06em;
+}
+
+.legend-swatch {
+width: 10px; height: 10px;
+border-radius: 2px;
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <h1>Melody Tracker</h1>
+  <span class="sub">3 ноты · 8 тактов · без повторов</span>
+</header>
+
+<div class="input-bar">
+  <label>Код</label>
+  <input type="text" id="codeInput" placeholder="например: Aa13, Bb25, Cc38…" autocomplete="off" spellcheck="false">
+  <button class="btn-apply" onclick="applyCode()">Применить</button>
+  <button class="btn-clear" onclick="clearAll()">Сбросить</button>
+</div>
+
+<div class="tracker-wrap">
+  <div class="col-labels">
+    <div class="col-label">Нота I</div>
+    <div class="col-label">Нота II</div>
+    <div class="col-label">Нота III</div>
+  </div>
+
+  <div class="tracker-body">
+    <div class="row-nums" id="rowNums"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</div>
+
+<div class="codes-panel">
+  <div class="codes-panel-header">Активные вариации</div>
+  <div class="codes-list" id="codesList">
+    <span class="codes-empty">нет активных записей</span>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--green-bg);border:1px solid var(--green)"></div>
+    Активная нота
+  </div>
+  <div class="legend-item">
+    <div class="legend-swatch" style="background:var(--surface);border:1px solid var(--border)"></div>
+    Пусто
+  </div>
+  <div class="legend-item" style="margin-left:auto;color:var(--text-faint)">
+    Код: [A/B/C][a/b][строка 1–8]
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ──────────────────────────────────────────────
+   Схема кодов:
+   Первая буква (A/B/C) → колонка (нота 1/2/3)
+   Вторая буква (a/b/c... или число) → позиция в строке
+     a=верхняя нота, b=ниже и т.д.
+   Число (1–8) → строка (такт)
+
+   Упрощённо:
+   A → колонка 0 (Нота I)
+   B → колонка 1 (Нота II)
+   C → колонка 2 (Нота III)
+   Цифра → строка 1–8
+
+   Примеры из задания: Aa-верх, то есть:
+   Колонка A, позиция a (можно читать как высота ноты),
+   число = такт.
+
+   В нашей сетке: 3 колонки, 8 строк.
+   Cell id: col(0-2)_row(0-7)
+   Код: {A|B|C}{a|b|c|d|e|f|g|h (высота 1-8)}{такт 1-8}
+   Но так как задание про 1 метку на столбец и выбор строки —
+   код будет: буква колонки + номер строки (1-8)
+   Пример: A3 = Нота I, такт 3; B7 = Нота II, такт 7
+
+   Расширенный код с высотой: Aa1 = Нота I, высота a (1-я из 8), такт 1
+   Для простоты: столбец (A/B/C) + строка (1–8), напр. "A3 B1 C5"
+   ────────────────────────────────────────────── */
+
+const COLS = 3;
+const ROWS = 8;
+const COL_LETTERS = ['A','B','C'];
+// state: active[col] = row index (0-based) or -1
+const state = [-1, -1, -1];
+
+function colFromCode(ch) {
+  return COL_LETTERS.indexOf(ch.toUpperCase());
+}
+
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  const rowNums = document.getElementById('rowNums');
+  grid.innerHTML = '';
+  rowNums.innerHTML = '';
+
+  // Row numbers
+  for (let r = 0; r < ROWS; r++) {
+    const rn = document.createElement('div');
+    rn.className = 'row-num';
+    rn.textContent = r + 1;
+    rowNums.appendChild(rn);
+  }
+
+  // Columns
+  for (let c = 0; c < COLS; c++) {
+    const col = document.createElement('div');
+    col.className = 'column';
+    for (let r = 0; r < ROWS; r++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = `cell_${c}_${r}`;
+      cell.dataset.col = c;
+      cell.dataset.row = r;
+
+      // Code label: e.g. A1, A2... B1...
+      const code = COL_LETTERS[c] + (r + 1);
+      cell.innerHTML = `
+        <span class="cell-code">${code}</span>
+        <span class="cell-dot"></span>
+      `;
+      cell.addEventListener('click', () => toggleCell(c, r));
+      col.appendChild(cell);
+    }
+    grid.appendChild(col);
+  }
+}
+
+function toggleCell(col, row) {
+  if (state[col] === row) {
+    // Deactivate
+    state[col] = -1;
+  } else {
+    // Deactivate previous in same column
+    if (state[col] !== -1) {
+      const prev = document.getElementById(`cell_${col}_${state[col]}`);
+      if (prev) prev.classList.remove('active');
+    }
+    state[col] = row;
+  }
+  renderGrid();
+  renderCodes();
+}
+
+function renderGrid() {
+  for (let c = 0; c < COLS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      const cell = document.getElementById(`cell_${c}_${r}`);
+      if (!cell) continue;
+      if (state[c] === r) {
+        cell.classList.add('active');
+      } else {
+        cell.classList.remove('active');
+      }
+    }
+  }
+}
+
+function renderCodes() {
+  const list = document.getElementById('codesList');
+  const active = [];
+  for (let c = 0; c < COLS; c++) {
+    if (state[c] !== -1) {
+      active.push({ col: c, row: state[c] });
+    }
+  }
+  if (active.length === 0) {
+    list.innerHTML = '<span class="codes-empty">нет активных записей</span>';
+    return;
+  }
+  list.innerHTML = active.map(a => {
+    const code = COL_LETTERS[a.col] + (a.row + 1);
+    return `<span class="code-tag" onclick="removeCol(${a.col})" title="Нажмите чтобы снять">
+      ${code} <span class="rm">✕</span>
+    </span>`;
+  }).join('');
+}
+
+function removeCol(col) {
+  state[col] = -1;
+  renderGrid();
+  renderCodes();
+}
+
+function applyCode() {
+  const raw = document.getElementById('codeInput').value.trim();
+  if (!raw) return;
+
+  // Parse tokens: one or more codes separated by spaces/commas
+  // Each code: letter (A/B/C) followed by digit (1-8)
+  const tokens = raw.toUpperCase().match(/[ABC]\d/g);
+  if (!tokens || tokens.length === 0) {
+    showToast('Неверный формат. Пример: A3 B1 C7');
+    return;
+  }
+
+  let applied = 0;
+  for (const tok of tokens) {
+    const colLetter = tok[0];
+    const rowNum = parseInt(tok[1]);
+    const col = colFromCode(colLetter);
+    if (col === -1 || rowNum < 1 || rowNum > 8) continue;
+    const row = rowNum - 1;
+
+    // Deactivate old cell in this column
+    if (state[col] !== -1) {
+      const prev = document.getElementById(`cell_${col}_${state[col]}`);
+      if (prev) prev.classList.remove('active');
+    }
+    state[col] = row;
+    applied++;
+  }
+
+  if (applied === 0) {
+    showToast('Коды не распознаны. Пример: A3 B1 C7');
+    return;
+  }
+
+  renderGrid();
+  renderCodes();
+  document.getElementById('codeInput').value = '';
+  showToast(`Применено: ${tokens.slice(0, applied).join(' ')}`);
+}
+
+function clearAll() {
+  state[0] = -1; state[1] = -1; state[2] = -1;
+  renderGrid();
+  renderCodes();
+  document.getElementById('codeInput').value = '';
+  showToast('Сброшено');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// Enter key support
+document.getElementById('codeInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyCode();
+});
+
+buildGrid();
+renderCodes();
+</script>
+
+</body>
+</html>
